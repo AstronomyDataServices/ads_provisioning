@@ -87,5 +87,3 @@ else:
 
 log.setLevel(DEBUG_LEVEL)
 log.debug('config -> ' + str(conf))
-
-#log.info('testicles')
