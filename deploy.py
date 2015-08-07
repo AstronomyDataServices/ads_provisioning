@@ -87,3 +87,11 @@ else:
 
 log.setLevel(DEBUG_LEVEL)
 log.debug('config -> ' + str(conf))
+
+env.hosts = [config._sections['env']['hosts']]
+log.debug(env.hosts)
+
+@task
+def test_task():
+    result = run('ls -l')
+    log.debug(result)
