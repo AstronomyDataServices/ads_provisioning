@@ -6,6 +6,7 @@ import time
 import logging
 import io
 import ConfigParser
+#import nova
 
 from fabric.api import run, sudo, put, env, require, local, task, lcd
 from fabric.context_managers import cd, hide, settings, prefix
@@ -95,3 +96,16 @@ log.debug(env.hosts)
 def test_task():
     result = run('ls -l')
     log.debug(result)
+
+
+@task
+def spawn_vm():
+    """Spawn a vanilla instance of Ubuntu"""
+    try:
+        run("nova boot --image <IMAGE ID> --flavor m1.small \
+            --availability-zone pawsey-01 \
+            --security-groups \"default\" \
+            --key-name ads_ssh \
+            ads_test_image")
+    except:
+        log.exception('Failed to spawn virtual machine ')
