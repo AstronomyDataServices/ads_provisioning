@@ -3,7 +3,6 @@ import logging
 import io
 import ConfigParser
 import logging.config
-# import nova
 
 from fabric.api import run, env
 from fabric.decorators import task
@@ -96,31 +95,21 @@ def test_task():
 def spawn_vm():
     """Spawn a vanilla instance of Ubuntu"""
 
-    # todo Move settings to conf file.
     try:
         result = run("nova --os-auth-url " + env['os_auth_url'] + "\
             --os-tenant-id " + env['os_tenant_id'] + "\
             --os-tenant-name " + env['os_tenant_name'] + "\
             --os-username " + env['os_username'] + "\
             --os-password " + env['os_password'] + "\
-            boot --image fc48b5bb-e67d-4e39-b9ba-b6725c8b0c88 --flavor m1.small\
-            --availability-zone pawsey-01 \
-            --security-groups default \
-            --key-name ads_ssh \
-            ads-test-image")
-        log.debug("nova boot --image fc48b5bb-e67d-4e39-b9ba-b6725c8b0c88 --flavor m1.small \
-            --availability-zone pawsey-01 \
-            --security-groups default \
-            --key-name ads_ssh \
-            --os-auth-url " + env['os_auth_url'] + "\
-            --os-tenant-id " + env['os_tenant_id'] + "\
-            --os-tenant-name " + env['os_tenant_name'] + "\
-            --os-username " + env['os_username'] + "\
-            --os-password " + env['os_password'] + "\
-            ads-test-image")
+            boot --image " + env['image'] + "\
+            --flavor " + env['flavor'] + "\
+            --availability-zone " + env['availability_zone'] + "\
+            --security-groups " + env['security_groups'] + "\
+            --key-name " + env['key_name'] + " " + env['image_name'])
         log.debug(result)
     except:
         log.exception('Failed to spawn virtual machine :: ')
+
 
 if __name__ == "__main__":
     # execute only if run as a script
