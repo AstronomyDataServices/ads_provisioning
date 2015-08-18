@@ -1,21 +1,12 @@
-import glob
-import platform
-import boto
 import os
-import time
 import logging
 import io
 import ConfigParser
-#import nova
+import logging.config
+# import nova
 
-from fabric.api import run, sudo, put, env, require, local, task, lcd
-from fabric.context_managers import cd, hide, settings, prefix
-from fabric.contrib.console import confirm
-from fabric.contrib.files import append, sed, comment, exists
-from fabric.decorators import task, serial
-from fabric.operations import prompt
-from fabric.utils import puts, abort, fastprint
-
+from fabric.api import run, env
+from fabric.decorators import task
 
 logging_conf = """[loggers]
 keys=root, deploy
@@ -89,8 +80,11 @@ else:
 log.setLevel(DEBUG_LEVEL)
 log.debug('config -> ' + str(conf))
 
-env.hosts = [config._sections['env']['hosts']]
-log.debug(env.hosts)
+# env.hosts = [config._sections['env']['hosts']]
+env.os_auth_url = config.get('env', 'os_auth_url')
+env = [config._sections['env']][0]
+log.debug(env)
+
 
 @task
 def test_task():
@@ -101,11 +95,33 @@ def test_task():
 @task
 def spawn_vm():
     """Spawn a vanilla instance of Ubuntu"""
+
+    # todo Move settings to conf file.
     try:
-        run("nova boot --image <IMAGE ID> --flavor m1.small \
+        result = run("nova --os-auth-url " + env['os_auth_url'] + "\
+            --os-tenant-id " + env['os_tenant_id'] + "\
+            --os-tenant-name " + env['os_tenant_name'] + "\
+            --os-username " + env['os_username'] + "\
+            --os-password " + env['os_password'] + "\
+            boot --image fc48b5bb-e67d-4e39-b9ba-b6725c8b0c88 --flavor m1.small\
             --availability-zone pawsey-01 \
-            --security-groups \"default\" \
+            --security-groups default \
             --key-name ads_ssh \
-            ads_test_image")
+            ads-test-image")
+        log.debug("nova boot --image fc48b5bb-e67d-4e39-b9ba-b6725c8b0c88 --flavor m1.small \
+            --availability-zone pawsey-01 \
+            --security-groups default \
+            --key-name ads_ssh \
+            --os-auth-url " + env['os_auth_url'] + "\
+            --os-tenant-id " + env['os_tenant_id'] + "\
+            --os-tenant-name " + env['os_tenant_name'] + "\
+            --os-username " + env['os_username'] + "\
+            --os-password " + env['os_password'] + "\
+            ads-test-image")
+        log.debug(result)
     except:
-        log.exception('Failed to spawn virtual machine ')
+        log.exception('Failed to spawn virtual machine :: ')
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    spawn_vm()
